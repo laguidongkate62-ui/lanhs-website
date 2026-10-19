@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan QR - Los Amigos National High School</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="ccs/style.css">
+        <style>
+        .scan-layout { display: flex; gap: 40px; align-items: flex-start; margin-bottom: 40px; }
+        .scanner-box { flex: 1; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(11,42,91,0.08); border: none !important; }
+        .scanner-box button { background: #1a6fd6; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-family: inherit; cursor: pointer; margin: 6px; }
+        .result-card { flex: 1; background: white; border-radius: 16px; padding: 35px; text-align: center; box-shadow: 0 4px 15px rgba(11,42,91,0.08); border-top: 8px solid #c5d9f2; }
+        .result-card.ok { border-top-color: #1f9d55; }
+        .result-card.warn { border-top-color: #f5c518; }
+        .result-card.error { border-top-color: #d64545; }
+        .result-icon { font-size: 70px; color: #c5d9f2; }
+        .result-card.ok .result-icon { color: #1f9d55; }
+        .result-card.warn .result-icon { color: #d9a800; }
+        .result-card.error .result-icon { color: #d64545; }
+        .result-status { font-weight: 700; font-size: 20px; margin: 10px 0 5px; }
+        .result-card h3 { font-size: 30px; margin: 5px 0; color: #0b2a5b; }
+        .result-time { font-weight: 700; color: #1a6fd6; font-size: 20px; }
+        .result-buttons { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
+        .result-buttons .btn-blue { border: none; cursor: pointer; margin-top: 0; font-size: 16px; }
+        .text-btn { display: inline-block; padding: 14px 30px; background: #1f9d55; color: white; text-decoration: none; font-weight: 600; border-radius: 30px; }
+        .text-btn:hover { background: #157a40; }
+        .hidden { display: none !important; }
+        .result-note { font-size: 14px; color: #6b7c93; }
+        @media (max-width: 900px) {
+            .scan-layout { flex-direction: column; }
+            .scanner-box, .result-card { width: 100%; box-sizing: border-box; }
+        }
+    </style>
+            <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="academics.html">Academics</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="generate.html">Generate</a></li>
+                <li><a href="id.html">ID</a></li>
+                <li><a href="scan.html">Scan</a></li>
+            </ul>
+        </nav>
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <img src="images/logo.png" alt="Los Amigos National High School logo" class="logo-img">
+            <h1>Los Amigos National High School</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="academics.html">Academics</a></li>
+                <li><a href="generate.html">QR ID</a></li>
+                <li><a href="scan.html" class="active">Scan</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="qr-page">
+
+        <section class="qr-title">
+            <span class="accent-bar"></span>
+            <h2>Scan Student QR ID</h2>
+            <p>Point the camera at a student's QR code to record their time in.</p>
+        </section>
+
+        <div class="scan-layout">
+
+            <!-- Camera -->
+            <div id="reader" class="scanner-box"></div>
+
+            <!-- Result -->
+            <div id="resultCard" class="result-card waiting">
+                <div class="result-icon"><i class="fa-solid fa-qrcode" id="resultIcon"></i></div>
+                <p class="result-status" id="resultStatus">Waiting for scan…</p>
+                <h3 id="resultName">—</h3>
+                <p id="resultInfo">Scan a QR code to see the student here.</p>
+                <p class="result-time" id="resultTime"></p>
+
+                <div class="result-buttons">
+                    <a id="textBtn" class="text-btn hidden" href="#">
+                        <i class="fa-solid fa-comment-sms"></i> Text Parent
+                    </a>
+                    <button id="nextBtn" class="btn-blue hidden">
+                        <i class="fa-solid fa-camera"></i> Scan Next
+                    </button>
+                </div>
+                <p class="result-note" id="resultNote"></p>
+            </div>
+        </div>
+
+        <!-- Today's attendance -->
+        <section class="records">
+            <div class="records-head">
+                <h3>Today's Attendance (<span id="todayCount">0</span>)</h3>
+            </div>
+            <div class="records-wrap">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Time In</th>
+                            <th>ID Number</th>
+                            <th>Name</th>
+                            <th>Grade &amp; Section</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceBody"></tbody>
+                </table>
+            </div>
+            <p class="records-note">
+                Attendance is saved in this browser only. Use the same computer or phone where the students were added on the QR ID page.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- QR scanner library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <script>
+        // ===== 1. Helpers to load and save from the browser =====
+        function load(key) {
+            try {
+                return JSON.parse(localStorage.getItem(key)) || [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function save(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (error) {
+                alert("Could not save. Your browser may be blocking storage.");
+            }
+        }
+
+        let attendance = load("lanhs-attendance");
+
+        // ===== 2. Parts of the page =====
+        const card = document.getElementById("resultCard");
+        const icon = document.getElementById("resultIcon");
+        const statusText = document.getElementById("resultStatus");
+        const nameText = document.getElementById("resultName");
+        const infoText = document.getElementById("resultInfo");
+        const timeText = document.getElementById("resultTime");
+        const noteText = document.getElementById("resultNote");
+        const textBtn = document.getElementById("textBtn");
+        const nextBtn = document.getElementById("nextBtn");
+
+        // ===== 3. Show a result on the card =====
+        function showResult(type, iconName, status, name, info, time) {
+            card.className = "result-card " + type;   // ok, warn, or error
+            icon.className = "fa-solid " + iconName;
+            statusText.textContent = status;
+            nameText.textContent = name;
+            infoText.textContent = info;
+            timeText.textContent = time;
+            nextBtn.classList.remove("hidden");
+        }
+
+        // ===== 4. Set up the "Text Parent" button =====
+        function setupTextButton(student, time, date) {
+            if (student.parentPhone) {
+                const message = "LANHS: " + student.name + " arrived at school at " + time + " on " + date + ".";
+                textBtn.href = "sms:" + student.parentPhone + "?&body=" + encodeURIComponent(message);
+                textBtn.classList.remove("hidden");
+                noteText.textContent = "";
+            } else {
+                textBtn.classList.add("hidden");
+                noteText.textContent = "No parent number saved for this student.";
+            }
+        }
+
+        // ===== 5. What happens when a QR code is scanned =====
+        function onScanSuccess(decodedText) {
+            try { scanner.pause(true); } catch (error) { /* image scan: nothing to pause */ }
+
+            let id = decodedText.trim();
+            try {
+                const link = new URL(id);                  // if the QR is a link...
+                if (link.searchParams.get("id")) {
+                    id = link.searchParams.get("id");      // ...take only the id= part
+                }
+            } catch (error) {
+                // not a link, so the QR is already just the ID
+            }
+            const students = load("lanhs-students");
+            const student = students.find(function (s) { return s.id === id; });
+
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+            const date = now.toLocaleDateString();
+
+            // Not found
+            if (!student) {
+                showResult("error", "fa-circle-xmark", "Not found", "Unknown QR code",
+                    "ID \"" + id + "\" is not in the student records.", "");
+                textBtn.classList.add("hidden");
+                noteText.textContent = "";
+                return;
+            }
+
+            const info = student.grade + " - " + student.section + "  |  ID: " + student.id;
+            const alreadyIn = attendance.find(function (a) { return a.id === id && a.date === date; });
+
+            if (alreadyIn) {
+                // Already scanned today
+                showResult("warn", "fa-circle-exclamation", "Already timed in today",
+                    student.name, info, "Time in: " + alreadyIn.time);
+                setupTextButton(student, alreadyIn.time, date);
+            } else {
+                // New time in
+                attendance.unshift({
+                    id: student.id,
+                    name: student.name,
+                    gradeSection: student.grade + " - " + student.section,
+                    date: date,
+                    time: time
+                });
+                save("lanhs-attendance", attendance);
+                showResult("ok", "fa-circle-check", "Time in recorded",
+                    student.name, info, "Time in: " + time);
+                setupTextButton(student, time, date);
+                showTodayAttendance();
+            }
+        }
+
+        // ===== 6. "Scan Next" button =====
+        nextBtn.addEventListener("click", function () {
+            card.className = "result-card waiting";
+            icon.className = "fa-solid fa-qrcode";
+            statusText.textContent = "Waiting for scan…";
+            nameText.textContent = "—";
+            infoText.textContent = "Scan a QR code to see the student here.";
+            timeText.textContent = "";
+            noteText.textContent = "";
+            textBtn.classList.add("hidden");
+            nextBtn.classList.add("hidden");
+            try { scanner.resume(); } catch (error) { /* image scan: nothing to resume */ }
+        });
+
+        // ===== 7. Show today's attendance in the table =====
+        function showTodayAttendance() {
+            const today = new Date().toLocaleDateString();
+            const todayList = attendance.filter(function (a) { return a.date === today; });
+            const body = document.getElementById("attendanceBody");
+            body.innerHTML = "";
+            document.getElementById("todayCount").textContent = todayList.length;
+
+            todayList.forEach(function (a) {
+                const row = document.createElement("tr");
+                [a.time, a.id, a.name, a.gradeSection].forEach(function (value) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+                body.appendChild(row);
+            });
+        }
+
+        // ===== 8. Start the camera scanner =====
+        const scanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 } }, false);
+        scanner.render(onScanSuccess, function () { /* ignore frames with no QR */ });
+
+        showTodayAttendance();
+    </script>
+</body>
+</html>

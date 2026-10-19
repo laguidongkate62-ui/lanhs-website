@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student ID - LANHS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0b2a5b, #1e5bd8);
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .id-card {
+            width: 330px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .id-top {
+            background: linear-gradient(90deg, #0b2a5b, #1e5bd8);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border-bottom: 5px solid #f5c518;
+        }
+
+        .id-top img {
+            height: 55px;
+        }
+
+        .id-top h1 {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .id-top p {
+            font-size: 11px;
+            margin: 3px 0 0;
+            color: #f5c518;
+        }
+
+        .id-body {
+            text-align: center;
+            padding: 25px 20px 15px;
+        }
+
+        .id-photo {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            border: 5px solid #f5c518;
+            background: #e8eef8;
+            color: #1e5bd8;
+            font-size: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .id-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .id-body h2 {
+            color: #0b2a5b;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .id-role {
+            display: inline-block;
+            margin-top: 8px;
+            background: #1e5bd8;
+            color: white;
+            font-size: 12px;
+            letter-spacing: 1px;
+            padding: 4px 14px;
+            border-radius: 20px;
+        }
+
+        .id-info {
+            margin: 20px;
+            background: #f4f6f9;
+            border-radius: 12px;
+            padding: 5px 15px;
+        }
+
+        .id-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #dde3ee;
+            font-size: 14px;
+        }
+
+        .id-row:last-child {
+            border-bottom: none;
+        }
+
+        .id-row span {
+            color: #666;
+        }
+
+        .id-row strong {
+            color: #0b2a5b;
+        }
+
+        .id-bottom {
+            background: #f5c518;
+            color: #0b2a5b;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="id-card">
+        <div class="id-top">
+            <img src="logo.png" alt="School logo">
+            <div>
+                <h1>LOS AMIGOS NATIONAL HIGH SCHOOL</h1>
+                <p>Tugbok District, Davao City</p>
+            </div>
+        </div>
+
+        <div class="id-body">
+            <div class="id-photo" id="photoBox">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h2 id="name">Student Name</h2>
+            <div class="id-role">STUDENT</div>
+        </div>
+
+        <div class="id-info">
+            <div class="id-row"><span>ID Number</span><strong id="sid">----</strong></div>
+            <div class="id-row"><span>Grade</span><strong id="grade">----</strong></div>
+            <div class="id-row"><span>Section</span><strong id="section">----</strong></div>
+        </div>
+
+        <div class="id-bottom">OFFICIAL STUDENT ID • LANHS</div>
+    </div>
+
+    <script>
+        // Read the details from the link, e.g. id.html?id=2026-0001&name=Juan...
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get("id") || "";
+
+        document.getElementById("name").textContent    = params.get("name") || "Unknown Student";
+        document.getElementById("sid").textContent     = id || "----";
+        document.getElementById("grade").textContent   = params.get("grade") || "----";
+        document.getElementById("section").textContent = params.get("section") || "----";
+
+        // Try to load photos/<ID>.jpg; keep the icon if there's no photo
+        if (id) {
+            const photo = new Image();
+            photo.alt = "Student photo";
+            photo.onload = function () {
+                const box = document.getElementById("photoBox");
+                box.innerHTML = "";
+                box.appendChild(photo);
+            };
+            photo.src = "photos/" + encodeURIComponent(id) + ".jpg";
+        }
+    </script>
+
+</body>
+</html>

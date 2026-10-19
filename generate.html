@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR ID Generator - Los Amigos National High School</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="ccs/style.css">
+</head>
+<body>
+    <header>
+        <div class="brand">
+            <img src="images/logo.png" alt="Los Amigos National High School logo" class="logo-img">
+            <h1>Los Amigos National High School</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="academics.html">Academics</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="generate.html">Generate</a></li>
+                <li><a href="id.html">ID</a></li>
+                <li><a href="scan.html">Scan</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="qr-page">
+
+        <section class="qr-title">
+            <span class="accent-bar"></span>
+            <h2>Student QR ID Generator</h2>
+            <p>Enter the student's details to create their QR code and save their record.</p>
+        </section>
+
+        <div class="qr-layout">
+
+            <!-- Form -->
+            <form id="studentForm" class="qr-form">
+                <label for="studentId">Student ID Number</label>
+                <input type="text" id="studentId" placeholder="e.g. 2026-0001" required>
+
+                <label for="studentName">Full Name</label>
+                <input type="text" id="studentName" placeholder="e.g. Juan Dela Cruz" required>
+
+                <label for="gradeLevel">Grade Level</label>
+                <select id="gradeLevel" required>
+                    <option value="">Choose grade</option>
+                    <option>Grade 7</option>
+                    <option>Grade 8</option>
+                    <option>Grade 9</option>
+                    <option>Grade 10</option>
+                    <option>Grade 11</option>
+                    <option>Grade 12</option>
+                </select>
+
+                <label for="section">Section</label>
+                <input type="text" id="section" placeholder="e.g. Rizal" required>
+                                <label for="parentPhone">Parent's Mobile Number (optional)</label>
+                <input type="tel" id="parentPhone" placeholder="e.g. 09171234567">
+
+
+                <button type="submit" class="btn-blue">
+                    <i class="fa-solid fa-qrcode"></i> Generate &amp; Save
+                </button>
+            </form>
+
+            <!-- ID card preview -->
+            <div class="qr-preview">
+                <div class="id-preview">
+                    <div class="id-preview-top">
+                        <img src="images/logo.png" alt="School logo">
+                        <span>LOS AMIGOS NATIONAL HIGH SCHOOL</span>
+                    </div>
+                    <div class="id-preview-body">
+                        <div class="id-preview-info">
+                            <div class="id-preview-photo"><i class="fa-solid fa-user"></i></div>
+                            <h4 id="previewName">Student Name</h4>
+                            <p id="previewGrade">Grade &amp; Section</p>
+                            <p class="id-number" id="previewId">ID: ----</p>
+                        </div>
+                        <div id="qrBox" class="qr-box"></div>
+                    </div>
+                </div>
+                <button id="downloadBtn" class="btn" disabled>
+                    <i class="fa-solid fa-download"></i> Download QR Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Records -->
+        <section class="records">
+            <div class="records-head">
+                <h3>Student Records (<span id="recordCount">0</span>)</h3>
+                <button id="exportBtn" class="btn-blue">
+                    <i class="fa-solid fa-file-excel"></i> Export to Excel (CSV)
+                </button>
+            </div>
+            <div class="records-wrap">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>ID Number</th>
+                            <th>Name</th>
+                            <th>Grade</th>
+                            <th>Section</th>
+                            <th>Date Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recordsBody"></tbody>
+                </table>
+            </div>
+            <p class="records-note">
+                Records are saved in this browser only. If you clear your browser data or use another computer, they won't be there.
+            </p>
+        </section>
+
+    </main>
+
+    <!-- QR code library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // ===== 1. Get the parts of the page we need =====
+        const form = document.getElementById("studentForm");
+        const qrBox = document.getElementById("qrBox");
+        const downloadBtn = document.getElementById("downloadBtn");
+        const exportBtn = document.getElementById("exportBtn");
+        const recordsBody = document.getElementById("recordsBody");
+        const recordCount = document.getElementById("recordCount");
+
+        // ===== 2. Load saved students from the browser =====
+        function loadStudents() {
+            try {
+                return JSON.parse(localStorage.getItem("lanhs-students")) || [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveStudents() {
+            try {
+                localStorage.setItem("lanhs-students", JSON.stringify(students));
+            } catch (error) {
+                alert("Could not save. Your browser may be blocking storage.");
+            }
+        }
+
+        let students = loadStudents();
+        let currentId = "";
+
+        // ===== 3. Make the QR code box =====
+        const qr = new QRCode(qrBox, { text: "LANHS", width: 200, height: 200 });
+
+        // ===== 4. Show a student on the ID card preview =====
+        function showStudent(student) {
+                const url = "https://laguidongkate62-ui.github.io/UNO-PITO/id.html" +
+        "?id=" + encodeURIComponent(student.id) +
+        "&name=" + encodeURIComponent(student.name) +
+        "&grade=" + encodeURIComponent(student.grade) +
+        "&section=" + encodeURIComponent(student.section);
+    qr.makeCode(url);
+            document.getElementById("previewName").textContent = student.name;
+            document.getElementById("previewGrade").textContent = student.grade + " - " + student.section;
+            document.getElementById("previewId").textContent = "ID: " + student.id;
+            currentId = student.id;
+            downloadBtn.disabled = false;
+        }
+
+        // ===== 5. Show all records in the table =====
+        function showRecords() {
+            recordsBody.innerHTML = "";
+            recordCount.textContent = students.length;
+
+            students.forEach(function (student, index) {
+                const row = document.createElement("tr");
+
+                [student.id, student.name, student.grade, student.section, student.date].forEach(function (value) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+
+                const actions = document.createElement("td");
+
+                const viewBtn = document.createElement("button");
+                viewBtn.className = "small-btn view";
+                viewBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> View';
+                viewBtn.onclick = function () { showStudent(student); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+                const deleteBtn = document.createElement("button");
+                deleteBtn.className = "small-btn delete";
+                deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i> Delete';
+                deleteBtn.onclick = function () {
+                    if (confirm("Delete " + student.name + "?")) {
+                        students.splice(index, 1);
+                        saveStudents();
+                        showRecords();
+                    }
+                };
+
+                actions.appendChild(viewBtn);
+                actions.appendChild(deleteBtn);
+                row.appendChild(actions);
+                recordsBody.appendChild(row);
+            });
+        }
+
+        // ===== 6. When the form is submitted =====
+        form.addEventListener("submit", function (event) {
+            event.preventDefault(); // stop the page from reloading
+
+            const student = {
+                id: document.getElementById("studentId").value.trim(),
+                name: document.getElementById("studentName").value.trim(),
+                grade: document.getElementById("gradeLevel").value,
+                section: document.getElementById("section").value.trim(),
+                parentPhone: document.getElementById("parentPhone").value.trim(),
+                date: new Date().toLocaleDateString()
+            };
+
+            // Don't allow the same ID twice
+            const alreadyExists = students.some(function (s) { return s.id === student.id; });
+            if (alreadyExists) {
+                alert("Student ID " + student.id + " is already recorded.");
+                return;
+            }
+
+            students.push(student);
+            saveStudents();
+            showStudent(student);
+            showRecords();
+            form.reset();
+        });
+
+        // ===== 7. Download the QR code as a picture =====
+        downloadBtn.addEventListener("click", function () {
+            const canvas = qrBox.querySelector("canvas");
+            const link = document.createElement("a");
+            link.href = canvas.toDataURL("image/png");
+            link.download = currentId + "-qr.png";
+            link.click();
+        });
+
+        // ===== 8. Export all records to a CSV file (opens in Excel) =====
+        exportBtn.addEventListener("click", function () {
+            if (students.length === 0) {
+                alert("No records to export yet.");
+                return;
+            }
+            const rows = [["ID Number", "Name", "Grade", "Section", "Date Added"]];
+            students.forEach(function (s) { rows.push([s.id, s.name, s.grade, s.section, s.date]); });
+
+            const csv = rows.map(function (row) {
+                return row.map(function (value) { return '"' + String(value).replace(/"/g, '""') + '"'; }).join(",");
+            }).join("\n");
+
+            const file = new Blob([csv], { type: "text/csv" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(file);
+            link.download = "lanhs-student-records.csv";
+            link.click();
+        });
+
+        // Show saved records when the page opens
+        showRecords();
+    </script>
+</body>
+</html>
